@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nutrition Planner - Personal Details</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #faedcd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed; 
+      background-position: center;
+    }
+
+    .form-container {
+      background: rgb(248, 251, 242);
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 500px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 26px;
+      color: #333;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #606c38;
+      border: none;
+      color: white;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    #ai-response {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+      padding: 10px;
+      background-color: #e8e8e8;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .food-list {
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    
+    .food-list ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    
+    .loading {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: #666;
+    }
+
+    #chatbot-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 25px;
+  background-color: #384608;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: background-color 0.3s;
+}
+#chatbot-toggle:hover {
+  background-color: #5fb1e1;
+}
+
+#chatbot-box {
+  position: fixed;
+  bottom: 80px;
+  right: 25px;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 1000;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#chatbot-header {
+  background-color: #606c38;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+#chatbot-body {
+  padding: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#chat-messages {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+#chat-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2 id="greeting">Welcome back!</h2>
+    <form id="detailsForm">
+      <label for="height">Height (cm)</label>
+      <input type="number" id="height" placeholder="Enter your height in cm" required>
+
+      <label for="weight">Weight (kg)</label>
+      <input type="number" id="weight" placeholder="Enter your weight in kg" required>
+
+      <label for="disease">Disease Type</label>
+      <select id="disease" required>
+        <option value="None">None</option>
+        <option value="Diabetes">Diabetes</option>
+        <option value="Hypertension">Hypertension</option>
+        <option value="Thyroid">Thyroid</option>
+        <option value="Heart Disease">Heart Disease</option>
+        <option value="Asthma">Asthma</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label for="severity">Severity</label>
+      <select id="severity" disabled>
+        <option value="">Select Severity</option>
+        <option value="Mild">Mild</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Severe">Severe</option>
+      </select>
+
+      <label for="activity">Physical Activity Level</label>
+      <select id="activity" required>
+        <option value="">Choose one</option>
+        <option value="Sedentary">Sedentary</option>
+        <option value="Light">Light</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Active">Active</option>
+        <option value="Very Active">Very Active</option>
+      </select>
+
+      <label for="calories">Calorie Intake per Day</label>
+      <input type="number" id="calories" placeholder="Enter your daily calorie intake" required>
+
+      <label for="cholesterol">Cholesterol Level (mg/dL)</label>
+      <input type="number" id="cholesterol" placeholder="Enter your cholesterol level">
+
+      <label for="bp">Blood Pressure (e.g., 120/80)</label>
+      <input type="text" id="bp" placeholder="Enter your blood pressure">
+
+      <label for="restrictions">Dietary Restrictions (if any)</label>
+      <textarea id="restrictions" rows="2" placeholder="Enter any dietary restrictions"></textarea>
+
+      <label for="allergies">Allergies (if any)</label>
+      <textarea id="allergies" rows="2" placeholder="Enter any allergies"></textarea>
+
+      <label for="cuisine">Preferred Cuisine</label>
+      <select id="cuisine" required>
+        <option value="">Select Cuisine</option>
+        <option value="Indian">Indian</option>
+        <option value="Chinese">Chinese</option>
+        <option value="Italian">Italian</option>
+        <!-- <option value="Mexican">Mexican</option> -->
+        <!-- <option value="Thai">Thai</option> -->
+        <!-- <option value="Mediterranean">Mediterranean</option> -->
+        <option value="Japanese">Japanese</option>
+        <option value="American">American</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label for="dietType">Diet Type</label>
+      <select id="dietType" required>
+        <option value="1">Vegetarian</option>
+        <option value="0">Non-Vegetarian</option>
+      </select>
+
+      <label for="exercise">Exercise Hours per Week</label>
+      <input type="number" id="exercise" placeholder="Enter exercise hours per week">
+
+      <label for="goal">Health Goal</label>
+      <select id="goal">
+        <option value="">Select Goal</option>
+        <option value="Weight Loss">Weight Loss</option>
+        <option value="Weight Gain">Weight Gain</option>
+        <option value="Maintenance">Maintenance</option>
+        <option value="Healthy">Healthy</option>
+      </select>
+
+      <label for="meals">Meals per Day</label>
+      <select id="meals">
+        <option value="3">3 Meals</option>
+        <option value="4">4 Meals</option>
+        <!-- <option value="5">5 Meals</option> -->
+      </select>
+
+      <button type="submit">Save Details</button>
+    </form>
+
+    <div id="loading" class="loading" style="display:none;">
+      Processing your information... Please wait.
+    </div>
+
+    <div id="ai-response"></div>
+    
+    <div id="food-recommendations" class="food-list" style="display:none;">
+      <h3>Recommended Foods:</h3>
+      <ul id="food-list"></ul>
+    </div>
+  </div>
+
+  <!-- Floating Chatbot Button -->
+<div id="chatbot-toggle" onclick="toggleChatbot()">🤖 Chat with NutriMate</div>
+
+<!-- Chatbot Window -->
+<div id="chatbot-box" style="display: none;">
+  <div id="chatbot-header">NutriMate</div>
+  <div id="chatbot-body">
+    <div id="chat-messages"></div>
+    <input type="text" id="chat-input" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendMessage()" />
+  </div>
+</div>
+
+
+  <script>
+    const userName = localStorage.getItem('userName');
+    document.getElementById('greeting').textContent = userName
+      ? `Hi ${userName}, tell us more about yourself!`
+      : `Hi Friend, tell us more about yourself!`;
+
+    // Enable or disable severity based on disease selection
+    const diseaseSelect = document.getElementById('disease');
+    const severitySelect = document.getElementById('severity');
+
+    diseaseSelect.addEventListener('change', () => {
+      const selectedDisease = diseaseSelect.value;
+      if (selectedDisease === "None") {
+        severitySelect.disabled = true;
+        severitySelect.value = "";
+      } else {
+        severitySelect.disabled = false;
+      }
+    });
+
+    // Generate personalized message without relying on Gemini
+    function generatePersonalizedMessage(name, age, goal) {
+      const messages = {
+        "Weight Loss": [
+          `Based on your profile, we've created a personalized plan to help you achieve healthy weight loss. Remember, slow and steady wins the race!`,
+          `We've analyzed your information and prepared a weight loss plan focused on nutritious, satisfying foods that will help you reach your goals.`,
+          `Your weight loss journey is unique, and we've tailored these recommendations to fit your specific needs and preferences.`
+        ],
+        "Weight Gain": [
+          `We've created a personalized plan to help you gain weight in a healthy way, focusing on nutrient-dense foods that will support your goals.`,
+          `Your weight gain journey needs quality calories, not just quantity. We've selected foods that will help you build muscle and gain healthy weight.`,
+          `Based on your profile, we've designed a weight gain plan that emphasizes nutritious foods to help you reach your target weight.`
+        ],
+        "Healthy": [
+          `Your health is our priority! We've crafted a balanced nutrition plan that supports your overall wellbeing and lifestyle.`,
+          `We've analyzed your profile and created a nutrition plan focused on whole foods that will help you maintain optimal health.`,
+          `Health is wealth! Your personalized nutrition plan emphasizes variety and balance to keep you feeling your best.`
+        ],
+        "Maintenance": [
+          `We've designed a balanced nutrition plan to help you maintain your current weight while providing all the nutrients your body needs.`,
+          `Your maintenance plan focuses on sustainable eating habits that will keep you energized and satisfied throughout the day.`,
+          `Based on your profile, we've created a nutrition plan that will help you maintain your weight and support your active lifestyle.`
+        ]
+      };
+
+      // Select a random message for the goal
+      const goalMessages = messages[goal] || messages["Healthy"];
+      const randomIndex = Math.floor(Math.random() * goalMessages.length);
+      
+      // Add name if available
+      const nameGreeting = name ? `${name}, ` : "";
+      
+      return `${nameGreeting}${goalMessages[randomIndex]}`;
+    }
+
+    // Mock function to replace getGeminiResponse since it's not working
+    async function getLocalResponse(userMessage) {
+      const name = localStorage.getItem('userName') || '';
+      const age = localStorage.getItem('userAge') || '30';
+      const goal = document.getElementById('goal').value || 'Healthy';
+      
+      return generatePersonalizedMessage(name, age, goal);
+    }
+
+    // Submit user data and get recommendations
+    document.getElementById('detailsForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      document.getElementById('ai-response').innerText = "Processing your information...";
+      const foodRecommendations = document.getElementById('food-recommendations');
+      const foodList = document.getElementById('food-list');
+      
+      const name = localStorage.getItem('userName');
+      const age = localStorage.getItem('userAge') || '30';
+      
+      // Prepare user data for prediction
+      const data = {
+        age: parseInt(age),
+        weight: parseFloat(document.getElementById('weight').value),
+        height: parseFloat(document.getElementById('height').value),
+        veg: document.getElementById('dietType').value === '1' ? 1 : 0,
+        goal: document.getElementById('goal').value || 'Healthy'
+      };
+      
+      // Store values in localStorage
+      localStorage.setItem('userWeight', data.weight);
+      localStorage.setItem('userHeight', data.height);
+      localStorage.setItem('userGoal', data.goal);
+      
+      try {
+        // Determine which endpoint to call based on the goal
+        let endpoint = '/healthy';  // Default endpoint
+        if (data.goal === 'Weight Gain') {
+          endpoint = '/weight-gain';
+        }
+        
+        const response = await fetch(`http://localhost:5000${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (result.recommended_food && result.recommended_food.length > 0) {
+          // Store diet plan in localStoragelocalStorage.setItem('dietPlan', JSON.stringify(result.recommended_food));
+          const fullPlan = {
+          breakfast: result.recommended_food.slice(0, 3),
+          lunch: result.recommended_food.slice(3, 6),
+          dinner: result.recommended_food.slice(6, 9),
+          snacks: result.recommended_food.slice(9, 12)
+        };
+        localStorage.setItem('dietPlan', JSON.stringify(fullPlan));
+
+          
+
+                    
+          // Display food recommendations
+          foodList.innerHTML = '';
+          result.recommended_food.slice(0, 10).forEach(food => {
+            const li = document.createElement('li');
+            li.textContent = food;
+            foodList.appendChild(li);
+          });
+          
+          foodRecommendations.style.display = 'block';
+          
+          // Generate personalized message
+          try {
+            // First try with Gemini if available
+            const aiMessage = await getGeminiResponse(`Create a personalized message for ${name}, age ${age}, with health goal of ${data.goal}. in just 5 lines  `)
+              .catch(() => getLocalResponse());
+            
+            document.getElementById('ai-response').innerText = aiMessage;
+          } catch (error) {
+            console.error("Error generating message:", error);
+            // Fallback to local message generation
+            const message = generatePersonalizedMessage(name, age, data.goal);
+            document.getElementById('ai-response').innerText = message;
+          }
+          
+          // Redirect after a delay
+          setTimeout(() => {
+            window.location.href = 'diet-plan.html';
+          }, 5000); // Wait 5 seconds before redirect
+          
+        } else {
+          document.getElementById('ai-response').innerText = "Couldn't generate food recommendations. Please try again.";
+        }
+      } catch (error) {
+        console.error('Error sending data:', error);
+        document.getElementById('ai-response').innerText = "Something went wrong! Make sure the server is running at http://localhost:5000";
+      }
+    });
+    
+    // Wrapper function that tries Gemini API but falls back to local generation if it fails
+    async function getGeminiResponse(userMessage) {
+      const apiKey = "AIzaSyD3oCC5X0ODIGL56C6ZZUFCErni1hRSLyE"; // Replace with your actual API key
+      const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+      try {
+        const response = await fetch(`${endpoint}?key=${apiKey}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: userMessage
+              }]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        console.log("Gemini response:", data);
+
+        if (data.error) {
+          throw new Error(`API Error: ${data.error.message}`);
+        }
+
+        if (data.candidates && data.candidates.length > 0) {
+          const aiText = data.candidates[0].content.parts[0].text;
+          return aiText;
+        } else {
+          // If no response, fall back to local generation
+          return await getLocalResponse(userMessage);
+        }
+      } catch (error) {
+        console.error("Error with API request:", error);
+        // Fall back to local generation
+        return await getLocalResponse(userMessage);
+      }
+    }
+
+    function toggleChatbot() {
+  const box = document.getElementById('chatbot-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const message = input.value.trim();
+  if (!message) return;
+
+  const chatBox = document.getElementById('chat-messages');
+  chatBox.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
+
+  input.value = '...thinking';
+  input.disabled = true;
+
+  try {
+    const reply = await getGeminiResponse(message);
+    chatBox.innerHTML += `<div><strong>NutriMate:</strong> ${reply}</div>`;
+  } catch (err) {
+    chatBox.innerHTML += `<div><strong>NutriMate:</strong> Sorry, I couldn't understand that.</div>`;
+  }
+
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+  document.getElementById('chatbot-body').scrollTop = chatBox.scrollHeight;
+}
+
+  </script>
+
+</body>
+</html>

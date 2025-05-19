@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nutrition Planner - Your Diet Plan</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #faedcd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed; 
+      background-position: center;
+    }
+
+    .container {
+      width: 700px;
+      background: rgb(248, 251, 242);
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 26px;
+      color: #333;
+      text-align: center;
+    }
+
+    .food-item {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .food-item h3 {
+      font-size: 20px;
+      color: #333;
+    }
+
+    .food-item p {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .meal-section {
+      margin-bottom: 25px;
+    }
+    
+    .meal-section h3 {
+      font-size: 22px;
+      color: #606c38;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+
+    .back-button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #606c38;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .back-button:hover {
+      background-color: #45a049;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .user-info {
+      background-color: #fefae0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .user-info p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    
+    .user-info strong {
+      color: #606c38;
+    }
+    
+    .nutrition-tip {
+      background-color: #e9edc9;
+      border-left: 4px solid #606c38;
+      padding: 10px;
+      margin: 20px 0;
+      font-style: italic;
+    }
+
+    #chatbot-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 25px;
+  background-color: #606c38;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: background-color 0.3s;
+}
+#chatbot-toggle:hover {
+  background-color: #5fb1e1;
+}
+
+#chatbot-box {
+  position: fixed;
+  bottom: 80px;
+  right: 25px;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 1000;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#chatbot-header {
+  background-color: #606c38;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+#chatbot-body {
+  padding: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#chat-messages {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+#chat-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Your Personalized Diet Plan</h2>
+    
+    <div class="user-info" id="user-info">
+      <!-- User info will be populated here -->
+    </div>
+    
+    <div class="nutrition-tip" id="nutrition-tip">
+      Tip: Drinking water before meals may help reduce hunger and prevent overeating.
+    </div>
+
+    <div id="diet-plan-container">
+      <!-- Diet plan will be populated here, organized by meals -->
+      <div class="meal-section" id="breakfast-section">
+        <h3>Breakfast</h3>
+        <div id="breakfast-foods"></div>
+      </div>
+      
+      <div class="meal-section" id="lunch-section">
+        <h3>Lunch</h3>
+        <div id="lunch-foods"></div>
+      </div>
+      
+      <div class="meal-section" id="dinner-section">
+        <h3>Dinner</h3>
+        <div id="dinner-foods"></div>
+      </div>
+      
+      <div class="meal-section" id="snacks-section">
+        <h3>Snacks</h3>
+        <div id="snacks-foods"></div>
+      </div>
+    </div>
+
+    <button class="back-button" onclick="window.history.back()">Go Back</button>
+  </div>
+
+<!-- Floating Chatbot Button -->
+<div id="chatbot-toggle" onclick="toggleChatbot()">🤖 Chat with NutriMate</div>
+
+<!-- Chatbot Window -->
+<div id="chatbot-box" style="display: none;">
+  <div id="chatbot-header">NutriMate</div>
+  <div id="chatbot-body">
+    <div id="chat-messages"></div>
+    <input type="text" id="chat-input" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendMessage()" />
+  </div>
+</div>
+
+
+  <script>
+    // ===== Food database from CSV (pre-processed) =====
+    // This is the food data extracted from your CSV files
+    const foodDatabase = [
+      {name: "Asparagus Cooked", benefit: "High in vitamin K, folate and antioxidants", meal: "lunch,dinner", isVeg: true, calories: 22},
+      {name: "Avocados", benefit: "Rich in healthy fats and potassium", meal: "breakfast", isVeg: true, calories: 160},
+      {name: "Bananas", benefit: "Great source of potassium and vitamin B6", meal: "breakfast", isVeg: true, calories: 89},
+      {name: "Bagels made in wheat", benefit: "Provides complex carbohydrates for energy", meal: "lunch,dinner", isVeg: true, calories: 250},
+      {name: "Berries", benefit: "High in antioxidants and vitamin C", meal: "breakfast", isVeg: true, calories: 349},
+      {name: "Brocolli", benefit: "Rich in vitamins K and C, potent antioxidant", meal: "lunch,dinner", isVeg: true, calories: 25},
+      {name: "Brown Rice", benefit: "Good source of fiber and magnesium", meal: "lunch,dinner", isVeg: true, calories: 362},
+      {name: "Cauliflower", benefit: "High in fiber and vitamins C, K and B6", meal: "lunch,dinner", isVeg: true, calories: 32},
+      {name: "American cheese", benefit: "Good source of calcium and protein", meal: "breakfast", isVeg: true, calories: 331},
+      {name: "Coffee", benefit: "Contains antioxidants and may improve mental alertness", meal: "breakfast", isVeg: true, calories: 2},
+      {name: "Corn", benefit: "Contains fiber, vitamins and minerals", meal: "breakfast,lunch,dinner", isVeg: true, calories: 97},
+      {name: "Dark chocolates", benefit: "Contains antioxidants and may improve heart health", meal: "dinner", isVeg: true, calories: 556},
+      {name: "Grapes", benefit: "Contains resveratrol which has heart health benefits", meal: "breakfast", isVeg: true, calories: 93},
+      {name: "Milk", benefit: "Rich in calcium and vitamin D for bone health", meal: "breakfast,dinner", isVeg: true, calories: 97},
+      {name: "Cashew Nuts", benefit: "Good source of healthy fats and plant protein", meal: "breakfast", isVeg: true, calories: 553},
+      {name: "Onions", benefit: "Contains antioxidants and has anti-inflammatory properties", meal: "lunch,dinner", isVeg: true, calories: 40},
+      {name: "Orange", benefit: "Excellent source of vitamin C and fiber", meal: "breakfast", isVeg: true, calories: 97},
+      {name: "Pasta with tomato sauce", benefit: "Provides complex carbs and lycopene from tomatoes", meal: "lunch,dinner", isVeg: true, calories: 71},
+      {name: "Pears", benefit: "Good source of fiber and antioxidants", meal: "breakfast", isVeg: true, calories: 57},
+      {name: "Peas", benefit: "Great source of plant protein and vitamins", meal: "lunch,dinner", isVeg: true, calories: 81},
+      {name: "Protein Powder", benefit: "Helps in muscle recovery and growth", meal: "breakfast", isVeg: true, calories: 411},
+      {name: "Pumpkin", benefit: "Rich in beta-carotene and fiber", meal: "lunch,dinner", isVeg: true, calories: 18},
+      {name: "Tuna Salad", benefit: "High in omega-3 fatty acids and protein", meal: "lunch,dinner", isVeg: false, calories: 187},
+      {name: "Tuna Fish", benefit: "Excellent source of protein and omega-3 fatty acids", meal: "dinner", isVeg: false, calories: 184},
+      {name: "Pepperoni Pizza", benefit: "Contains protein and calcium", meal: "dinner", isVeg: true, calories: 298},
+      {name: "Cheese Pizza", benefit: "Source of calcium and protein", meal: "dinner", isVeg: true, calories: 276},
+      {name: "French Fries", benefit: "Provides energy from carbohydrates", meal: "lunch,dinner", isVeg: true, calories: 289},
+      {name: "Chicken Burger", benefit: "Good source of protein", meal: "lunch,dinner", isVeg: false, calories: 292},
+      {name: "Cheese Burger", benefit: "Contains protein and calcium", meal: "lunch,dinner", isVeg: true, calories: 256},
+      {name: "Chicken Sandwich", benefit: "Balanced source of protein and carbs", meal: "lunch,dinner", isVeg: false, calories: 257},
+      {name: "Dosa", benefit: "Low calorie and fermented food good for gut health", meal: "breakfast,lunch,dinner", isVeg: true, calories: 168},
+      {name: "Idli", benefit: "Low fat, fermented food for gut health", meal: "breakfast,lunch,dinner", isVeg: true, calories: 156},
+      {name: "Poha", benefit: "Light breakfast rich in iron", meal: "breakfast", isVeg: true, calories: 130},
+      {name: "Chappati", benefit: "Whole grain goodness with fiber", meal: "lunch,dinner", isVeg: true, calories: 297},
+      {name: "Tomato", benefit: "Rich in lycopene, great for heart health", meal: "breakfast,lunch,dinner", isVeg: true, calories: 16},
+      {name: "Yogurt", benefit: "Probiotic-rich food good for gut health", meal: "breakfast,lunch,dinner", isVeg: true, calories: 60},
+      {name: "Noodles", benefit: "Quick energy source from carbohydrates", meal: "lunch,dinner", isVeg: true, calories: 108},
+      {name: "Uttapam", benefit: "Fermented food rich in probiotics", meal: "breakfast,lunch,dinner", isVeg: true, calories: 188},
+      {name: "Bhaji Pav", benefit: "Contains mixed vegetables with multiple nutrients", meal: "breakfast", isVeg: true, calories: 151},
+      {name: "Dal Makhani", benefit: "Rich in plant protein and fiber", meal: "lunch,dinner", isVeg: true, calories: 109},
+      {name: "Almonds", benefit: "Rich in vitamin E and healthy fats", meal: "breakfast", isVeg: true, calories: 579},
+      {name: "Mushrooms", benefit: "Low calorie, high in selenium and B vitamins", meal: "breakfast,lunch,dinner", isVeg: true, calories: 22},
+      {name: "Egg Yolk", benefit: "Contains choline for brain health", meal: "breakfast", isVeg: false, calories: 196},
+      {name: "Sweet Potatoes", benefit: "Rich in beta-carotene and fiber", meal: "breakfast,lunch", isVeg: true, calories: 76},
+      {name: "Boiled Potatoes", benefit: "Good source of potassium and vitamin C", meal: "breakfast,lunch,dinner", isVeg: true, calories: 87},
+      {name: "White Rice", benefit: "Easy to digest source of energy", meal: "lunch,dinner", isVeg: true, calories: 360},
+      {name: "Orange juice", benefit: "Rich in vitamin C for immunity", meal: "breakfast", isVeg: true, calories: 45},
+      {name: "Greek yogurt", benefit: "High in protein and probiotics", meal: "breakfast,lunch,dinner", isVeg: true, calories: 73},
+      {name: "Oat Bran", benefit: "High in soluble fiber, helps lower cholesterol", meal: "breakfast", isVeg: true, calories: 40},
+      {name: "Green Tea", benefit: "Rich in antioxidants, supports metabolism", meal: "breakfast", isVeg: true, calories: 1},
+      {name: "Chia seeds", benefit: "Rich in omega-3 fatty acids and fiber", meal: "breakfast", isVeg: true, calories: 486},
+      {name: "Cottage cheese", benefit: "High in protein, low in fat", meal: "lunch,dinner", isVeg: true, calories: 95},
+      {name: "Salmon", benefit: "Excellent source of omega-3 fatty acids and protein", meal: "lunch,dinner", isVeg: false, calories: 127},
+      {name: "Corn Flakes", benefit: "Fortified with vitamins and minerals", meal: "breakfast", isVeg: true, calories: 384},
+      {name: "Beans", benefit: "Rich in plant protein and fiber", meal: "lunch,dinner", isVeg: true, calories: 31},
+      {name: "Lentils", benefit: "High in protein and iron", meal: "lunch,dinner", isVeg: true, calories: 101},
+      {name: "Pasta with corn", benefit: "Good source of complex carbohydrates", meal: "lunch,dinner", isVeg: true, calories: 126},
+      {name: "Tea", benefit: "Contains antioxidants and promotes relaxation", meal: "breakfast", isVeg: true, calories: 1},
+      {name: "Apples", benefit: "Rich in fiber and antioxidants", meal: "breakfast", isVeg: true, calories: 52},
+      {name: "Strawberries", benefit: "High in vitamin C and antioxidants", meal: "breakfast", isVeg: true, calories: 32},
+      {name: "Quinoa", benefit: "Complete protein containing all essential amino acids", meal: "breakfast,lunch", isVeg: true, calories: 120},
+      {name: "Nachos", benefit: "Contains calcium and protein", meal: "breakfast,lunch,dinner", isVeg: true, calories: 350},
+      {name: "Pad Thai", benefit: "Contains protein and complex carbohydrates", meal: "lunch,dinner", isVeg: false, calories: 300},
+      {name: "Thai Green Curry with Rice", benefit: "Has anti-inflammatory properties from herbs", meal: "lunch,dinner", isVeg: true, calories: 450},
+      {name: "Sushi Rolls", benefit: "Good source of omega-3 fatty acids", meal: "lunch,dinner", isVeg: false, calories: 280},
+      {name: "Miso Soup with Tofu", benefit: "Contains probiotics and isoflavones", meal: "breakfast,lunch,dinner", isVeg: true, calories: 90},
+      {name: "Falafel Wrap", benefit: "Rich in plant protein and fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Grilled Chicken with Hummus", benefit: "High protein meal with healthy fats", meal: "lunch,dinner", isVeg: false, calories: 400},
+      {name: "Poha", benefit: "balanced food with 2.6g protein and 1.1g fiber", meal: "breakfast", isVeg: true, calories: 130},
+      {name: "Chappati", benefit: "balanced food with 11.0g protein and 4.9g fiber", meal: "lunch,dinner", isVeg: true, calories: 297},
+      {name: "Yogurt", benefit: "low-calorie food with 3.1g protein and 0.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 60},
+      {name: "Brownie", benefit: "high-energy food with 4.4g protein and 2.9g fiber", meal: "breakfast", isVeg: true, calories: 407},
+      {name: "Noodles", benefit: "balanced food with 1.8g protein and 1.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 108},
+      {name: "Uttapam", benefit: "balanced food with 4.4g protein and 2.2g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 188},
+      {name: "Bhaji Pav", benefit: "balanced food with 9.0g protein and 1.0g fiber", meal: "breakfast", isVeg: true, calories: 151},
+      {name: "Dal Makhani", benefit: "balanced food with 2.1g protein and 1.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 109},
+      {name: "Almonds", benefit: "high-energy food with 21.0g protein and 13.0g fiber", meal: "breakfast", isVeg: true, calories: 579},
+      {name: "Stuffed Bell Peppers", benefit: "balanced food with 12.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 220},
+      {name: "Butter Chicken", benefit: "high-energy food with 28.0g protein and 2.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 450},
+      {name: "Granola Bar", benefit: "balanced food with 4.0g protein and 4.0g fiber", meal: "breakfast", isVeg: true, calories: 210},
+      {name: "Pasta Primavera", benefit: "high-energy food with 12.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Vegetable Stir Fry", benefit: "balanced food with 6.0g protein and 2.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 200},
+      {name: "Vegetable Curry", benefit: "balanced food with 8.0g protein and 3.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 300},
+      {name: "Vegetable Soup", benefit: "balanced food with 4.0g protein and 2.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 150},
+      {name: "Vegetable Fried Rice", benefit: "high-energy food with 8.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Poha", benefit: "balanced food with 2.6g protein and 1.1g fiber", meal: "breakfast", isVeg: true, calories: 130},
+      {name: "Chappati", benefit: "balanced food with 11.0g protein and 4.9g fiber", meal: "lunch,dinner", isVeg: true, calories: 297},
+      {name: "Tomato", benefit: "low-calorie food with 1.2g protein and 0.9g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 16},
+      {name: "Yogurt", benefit: "low-calorie food with 3.1g protein and 0.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 60},
+      {name: "Brownie", benefit: "high-energy food with 4.4g protein and 2.9g fiber", meal: "breakfast", isVeg: true, calories: 407},
+      {name: "Noodles", benefit: "balanced food with 1.8g protein and 1.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 108},
+      {name: "Uttapam", benefit: "balanced food with 4.4g protein and 2.2g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 188},
+      {name: "Bhaji Pav", benefit: "balanced food with 9.0g protein and 1.0g fiber", meal: "breakfast", isVeg: true, calories: 151},
+      {name: "Dal Makhani", benefit: "balanced food with 2.1g protein and 1.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 109},
+      {name: "Almonds", benefit: "high-energy food with 21.0g protein and 13.0g fiber", meal: "breakfast", isVeg: true, calories: 579},
+      {name: "Mushrooms", benefit: "low-calorie food with 3.1g protein and 1.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 22},
+      {name: "Egg Yolk cooked", benefit: "balanced food with 14.0g protein and 0.0g fiber", meal: "breakfast", isVeg: false, calories: 196},
+      {name: "Sweet Potatoes cooked", benefit: "low-calorie food with 1.4g protein and 2.5g fiber", meal: "breakfast,lunch", isVeg: true, calories: 76},
+      {name: "Boiled Potatoes", benefit: "low-calorie food with 1.9g protein and 2.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 87},
+      {name: "White Rice", benefit: "high-energy food with 6.6g protein and 1.4g fiber", meal: "lunch,dinner", isVeg: true, calories: 360},
+      {name: "Orange juice", benefit: "low-calorie food with 0.7g protein and 0.2g fiber", meal: "breakfast", isVeg: true, calories: 45},
+      {name: "Greek yogurt plain", benefit: "low-calorie food with 10.0g protein and 0.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 73},
+      {name: "Oat Bran Cooked", benefit: "low-calorie food with 3.2g protein and 2.6g fiber", meal: "breakfast", isVeg: true, calories: 40},
+      {name: "Green Tea", benefit: "low-calorie food with 0.2g protein and 0.0g fiber", meal: "breakfast", isVeg: true, calories: 1},
+      {name: "Chia seeds", benefit: "high-energy food with 17.0g protein and 34.0g fiber", meal: "breakfast", isVeg: true, calories: 486},
+      {name: "Cottage cheese with vegetables", benefit: "low-calorie food with 11.0g protein and 0.1g fiber", meal: "lunch,dinner", isVeg: true, calories: 95},
+      {name: "Salmon", benefit: "balanced food with 21.0g protein and 0.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 127},
+      {name: "Cereals-Corn Flakes", benefit: "high-energy food with 5.9g protein and 2.7g fiber", meal: "breakfast", isVeg: true, calories: 384},
+      {name: "Beans", benefit: "low-calorie food with 1.8g protein and 2.7g fiber", meal: "lunch,dinner", isVeg: true, calories: 31},
+      {name: "Lentils", benefit: "balanced food with 8.8g protein and 0.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 101},
+      {name: "Pasta with corn homemade", benefit: "balanced food with 2.6g protein and 4.8g fiber", meal: "lunch,dinner", isVeg: true, calories: 126},
+      {name: "Tea", benefit: "low-calorie food with 0.0g protein and 0.0g fiber", meal: "breakfast", isVeg: true, calories: 1},
+      {name: "Apples", benefit: "low-calorie food with 0.3g protein and 24.0g fiber", meal: "breakfast", isVeg: true, calories: 52},
+      {name: "Strawberries", benefit: "low-calorie food with 0.7g protein and 2.0g fiber", meal: "breakfast", isVeg: true, calories: 32},
+      {name: "Quninoa", benefit: "balanced food with 4.4g protein and 2.8g fiber", meal: "breakfast,lunch", isVeg: true, calories: 120},
+      {name: "Goat meat", benefit: "balanced food with 21.0g protein and 0.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 109},
+      {name: "Chicken Strips", benefit: "balanced food with 19.0g protein and 1.1g fiber", meal: "dinner", isVeg: false, calories: 295},
+      {name: "Steak Fries", benefit: "balanced food with 3.3g protein and 3.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 255},
+      {name: "Mexican Rice", benefit: "balanced food with 3.6g protein and 1.1g fiber", meal: "lunch,dinner", isVeg: true, calories: 195},
+      {name: "Fried Shrimp", benefit: "high-energy food with 14.0g protein and 1.5g fiber", meal: "dinner", isVeg: false, calories: 319},
+      {name: "Spaghetti and meatballs", benefit: "balanced food with 7.8g protein and 1.5g fiber", meal: "dinner", isVeg: false, calories: 170},
+      {name: "Pork cooked", benefit: "balanced food with 26.0g protein and 0.0g fiber", meal: "dinner", isVeg: false, calories: 297},
+      {name: "Bacon cooked", benefit: "balanced food with 28.0g protein and 0.0g fiber", meal: "dinner", isVeg: false, calories: 146},
+      {name: "Nachos", benefit: "high-energy food with 4.3g protein and 3.2g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 350},
+      {name: "Chicken Popcorn", benefit: "high-energy food with 18.0g protein and 1.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 351},
+      {name: "Turkey cooked", benefit: "balanced food with 27.0g protein and 0.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 203},
+      {name: "Beef sticks", benefit: "high-energy food with 22.0g protein and 0.0g fiber", meal: "breakfast", isVeg: false, calories: 550},
+      {name: "Banana Chips", benefit: "high-energy food with 2.3g protein and 7.7g fiber", meal: "breakfast", isVeg: true, calories: 519},
+      {name: "Honey", benefit: "high-energy food with 0.3g protein and 0.2g fiber", meal: "breakfast,dinner", isVeg: true, calories: 304},
+      {name: "Chocolate Icecream", benefit: "balanced food with 3.8g protein and 1.2g fiber", meal: "dinner", isVeg: true, calories: 216},
+      {name: "Vanilla Ice cream", benefit: "balanced food with 3.5g protein and 0.7g fiber", meal: "dinner", isVeg: true, calories: 207},
+      {name: "Strawberry Icecream", benefit: "balanced food with 3.2g protein and 0.9g fiber", meal: "dinner", isVeg: true, calories: 192},
+      {name: "Marshmallows", benefit: "high-energy food with 1.8g protein and 0.1g fiber", meal: "dinner", isVeg: true, calories: 318},
+      {name: "Chocolate milk", benefit: "high-energy food with 7.7g protein and 3.4g fiber", meal: "breakfast", isVeg: true, calories: 535},
+      {name: "Rice Pudding", benefit: "high-energy food with 2.7g protein and 0.7g fiber", meal: "dinner", isVeg: true, calories: 376},
+      {name: "Pad Thai", benefit: "balanced food with 12.0g protein and 2.5g fiber", meal: "lunch,dinner", isVeg: false, calories: 300},
+      {name: "Sushi Rolls", benefit: "balanced food with 8.0g protein and 1.5g fiber", meal: "lunch,dinner", isVeg: false, calories: 280},
+      {name: "Miso Soup with Tofu", benefit: "low-calorie food with 7.0g protein and 1.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 90},
+      {name: "Falafel Wrap", benefit: "high-energy food with 10.0g protein and 4.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Grilled Chicken with Hummus", benefit: "high-energy food with 20.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 400},
+      {name: "Avocado Toast", benefit: "balanced food with 6.0g protein and 7.0g fiber", meal: "breakfast,lunch", isVeg: true, calories: 250},
+      {name: "Paneer Tikka", benefit: "balanced food with 18.0g protein and 1.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 280},
+      {name: "Tofu Stir Fry", benefit: "balanced food with 14.0g protein and 2.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 210},
+      {name: "Kale Salad with Chickpeas", benefit: "balanced food with 9.0g protein and 6.0g fiber", meal: "breakfast,lunch", isVeg: true, calories: 180},
+      {name: "Egg Fried Rice", benefit: "balanced food with 7.0g protein and 1.8g fiber", meal: "lunch,dinner", isVeg: true, calories: 300},
+      {name: "Pho with Beef", benefit: "high-energy food with 20.0g protein and 2.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 350},
+      {name: "Stuffed Bell Peppers", benefit: "balanced food with 12.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 220},
+      {name: "Butter Chicken", benefit: "high-energy food with 28.0g protein and 2.0g fiber", meal: "lunch,dinner", isVeg: false, calories: 450},
+      {name: "Granola Bar", benefit: "balanced food with 4.0g protein and 4.0g fiber", meal: "breakfast", isVeg: true, calories: 210},
+      {name: "Pasta Primavera", benefit: "high-energy food with 12.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Vegetable Stir Fry", benefit: "balanced food with 6.0g protein and 2.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 200},
+      {name: "Vegetable Curry", benefit: "balanced food with 8.0g protein and 3.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 300},
+      {name: "Vegetable Soup", benefit: "balanced food with 4.0g protein and 2.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 150},
+      {name: "Vegetable Fried Rice", benefit: "high-energy food with 8.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 350},
+      {name: "Protein shake with milk", benefit: "Protein-rich drink for muscle recovery", meal: "breakfast,snacks", isVeg: true, calories: 280},
+      {name: "Beef jerky", benefit: "High-protein low-carb snack", meal: "snacks", isVeg: false, calories: 150},
+      {name: "Chicken wrap", benefit: "Lean protein and whole grains", meal: "lunch,dinner", isVeg: false, calories: 350},
+      {name: "Tuna sandwich", benefit: "Rich in omega-3 and protein", meal: "lunch", isVeg: false, calories: 300},
+      {name: "Cheese and cold cuts", benefit: "Protein-packed and calcium-rich snack", meal: "snacks", isVeg: false, calories: 320},
+      {name: "Dosa", benefit: "balanced food with 4.5g protein and 0.9g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 168},
+      {name: "Idli", benefit: "balanced food with 5.0g protein and 2.1g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 156},
+      {name: "Paneer Butter Masala", benefit: "high-energy food with 12.0g protein and 2.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 320},
+      {name: "Rajma", benefit: "balanced food with 15.0g protein and 9.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 245},
+      {name: "Kadhi", benefit: "balanced food with 6.0g protein and 2.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 180},
+      {name: "Bhindi Masala", benefit: "low-calorie food with 3.0g protein and 3.5g fiber", meal: "lunch,dinner", isVeg: true, calories: 120},
+      {name: "Aloo Gobi", benefit: "balanced food with 4.0g protein and 4.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 150},
+      {name: "Sambar", benefit: "low-calorie food with 6.0g protein and 3.0g fiber", meal: "breakfast,lunch,dinner", isVeg: true, calories: 130},
+      {name: "Palak Paneer", benefit: "high-energy food with 14.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 280},
+      {name: "Chole", benefit: "balanced food with 11.0g protein and 6.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 210},
+      {name: "Methi Paratha", benefit: "balanced food with 5.0g protein and 3.5g fiber", meal: "breakfast,lunch", isVeg: true, calories: 200},
+      {name: "Kheer", benefit: "high-energy food with 6.0g protein and 1.2g fiber", meal: "dinner", isVeg: true, calories: 290},
+      {name: "Greek yogurt", benefit: "High in protein and probiotics for gut health", meal: "breakfast", isVeg: true, calories: 100},
+      {name: "Fruit bowl", benefit: "Rich in vitamins and natural sugars from fruits", meal: "breakfast", isVeg: true, calories: 150},
+      {name: "Mixed nuts", benefit: "High in healthy fats and protein", meal: "snacks", isVeg: true, calories: 300},
+      {name: "Hummus with veggie sticks", benefit: "Good source of fiber and plant-based protein", meal: "snacks", isVeg: true, calories: 200},
+      {name: "Chia pudding", benefit: "Loaded with fiber and omega-3 fatty acids", meal: "breakfast", isVeg: true, calories: 250},
+      {name: "Oatmeal with fruits", benefit: "Heart-healthy and rich in fiber", meal: "breakfast", isVeg: true, calories: 220},
+      {name: "Yogurt with berries", benefit: "Rich in probiotics and antioxidants", meal: "breakfast", isVeg: true, calories: 180},
+      {name: "Avocado Toast", benefit: "Provides healthy fats and fiber", meal: "breakfast", isVeg: true, calories: 250},
+      {name: "Vegetable salad", benefit: "Low-calorie meal rich in fiber and vitamins", meal: "lunch,dinner", isVeg: true, calories: 120},
+      {name: "Lentil soup", benefit: "High in plant protein and fiber", meal: "lunch,dinner", isVeg: true, calories: 180},
+      {name: "Quinoa bowl", benefit: "Complete protein with fiber and minerals", meal: "lunch,dinner", isVeg: true, calories: 250},
+      {name: "Vegetable stir-fry", benefit: "Low-calorie and packed with micronutrients", meal: "lunch,dinner", isVeg: true, calories: 200},
+      {name: "Tofu curry", benefit: "Plant-based protein rich in iron and calcium", meal: "lunch,dinner", isVeg: true, calories: 280},
+      {name: "Bean burrito", benefit: "Balanced meal with fiber, protein, and carbs", meal: "lunch", isVeg: true, calories: 350},
+      {name: "Egg white omelet", benefit: "High-protein and low-fat breakfast option", meal: "breakfast", isVeg: false, calories: 150},
+      {name: "Whole grain toast", benefit: "Complex carbs with fiber and B-vitamins", meal: "breakfast", isVeg: true, calories: 140},
+      {name: "Grilled chicken salad", benefit: "Lean protein with vitamins and fiber", meal: "lunch", isVeg: false, calories: 220},
+      {name: "Turkey wrap", benefit: "Lean protein option ideal for energy and satiety", meal: "lunch", isVeg: false, calories: 300},
+      {name: "Tuna sandwich", benefit: "Omega-3 rich with quality protein", meal: "lunch", isVeg: false, calories: 280},
+      {name: "Grilled fish", benefit: "High in protein and omega-3 fatty acids", meal: "dinner", isVeg: false, calories: 260},
+      {name: "Chicken stir-fry", benefit: "High-protein and nutrient-rich meal", meal: "lunch,dinner", isVeg: false, calories: 300},
+      {name: "Lean beef with vegetables", benefit: "Iron-rich protein meal with fiber", meal: "dinner", isVeg: false, calories: 350},
+      {name: "Cottage cheese", benefit: "High in casein protein and calcium", meal: "snacks", isVeg: true, calories: 90},
+      {name: "Hard-boiled eggs", benefit: "Portable high-protein snack", meal: "breakfast,snacks", isVeg: false, calories: 78},
+      {name: "Pop Corn", benefit: "Light snack high in fiber and whole grains", meal: "snacks", isVeg: true, calories: 100},
+      {name: "Bread Butter", benefit: "Quick source of carbs and fat for energy", meal: "breakfast", isVeg: true, calories: 210},
+      {name: "Protein shake with fruits", benefit: "High in protein and natural sugars from fruits", meal: "breakfast,snacks", isVeg: true, calories: 250},
+      {name: "Peanut butter sandwich", benefit: "Rich in healthy fats and plant protein", meal: "breakfast,snacks", isVeg: true, calories: 320},
+      {name: "Trail mix", benefit: "Energy-dense with healthy fats and fiber", meal: "snacks", isVeg: true, calories: 450},
+      {name: "Nuts and dried fruits", benefit: "Great source of antioxidants and omega-3s", meal: "snacks", isVeg: true, calories: 400},
+      {name: "Avocado dip with crackers", benefit: "Loaded with healthy fats and fiber", meal: "snacks", isVeg: true, calories: 300},
+      {name: "Protein shake with milk", benefit: "Protein-rich drink for muscle recovery", meal: "breakfast,snacks", isVeg: true, calories: 280},
+      {name: "Beef jerky", benefit: "High-protein low-carb snack", meal: "snacks", isVeg: false, calories: 150},
+      {name: "Chicken wrap", benefit: "Lean protein and whole grains", meal: "lunch,dinner", isVeg: false, calories: 350},
+      {name: "Tuna sandwich", benefit: "Rich in omega-3 and protein", meal: "lunch", isVeg: false, calories: 300},
+      {name: "Cheese and cold cuts", benefit: "Protein-packed and calcium-rich snack", meal: "snacks", isVeg: false, calories: 320},
+      {name: "Green Curry with Rice", benefit: "high-energy food with 10.0g protein and 3.0g fiber", meal: "lunch,dinner", isVeg: true, calories: 450},
+      {name: "Chocolate Doughnuts", benefit: "high-energy food with 4.9g protein and 1.9g fiber", meal: "lunch,dinner", isVeg: true, calories: 452},
+      {name: "Bruschetta", benefit: "balanced food with 5.0g protein and 1.6g fiber", meal: "breakfast", isVeg: true, calories: 210},
+      {name: "Marinated olives", benefit: "balanced food with 4.7g protein and 3.4g fiber", meal: "snacks", isVeg: true, calories: 177},
+      {name: "Focaccia with olive oil", benefit: "balanced food with 9.1g protein and 3.4g fiber", meal: "dinner", isVeg: true, calories: 221},
+      {name: "Roasted red peppers", benefit: "balanced food with 13.5g protein and 4.0g fiber", meal: "lunch", isVeg: true, calories: 164},
+      {name: "Prosciutto wrapped melon", benefit: "balanced food with 2.5g protein and 3.4g fiber", meal: "dinner", isVeg: false, calories: 151},
+      {name: "Italian meatballs", benefit: "low-calorie food with 5.6g protein and 1.2g fiber", meal: "dinner", isVeg: true, calories: 112},
+      {name: "Antipasto skewers", benefit: "low-calorie food with 11.3g protein and 1.8g fiber", meal: "breakfast", isVeg: true, calories: 108},
+      {name: "Caprese salad", benefit: "low-calorie food with 9.7g protein and 2.8g fiber", meal: "lunch", isVeg: true, calories: 105},
+      {name: "Roasted chickpeas", benefit: "balanced food with 12.8g protein and 3.4g fiber", meal: "breakfast", isVeg: true, calories: 161},
+      {name: "Dhokla", benefit: "high-energy food with 14.6g protein and 2.7g fiber", meal: "dinner", isVeg: true, calories: 297},
+      {name: "Chaat", benefit: "balanced food with 14.8g protein and 3.3g fiber", meal: "breakfast", isVeg: true, calories: 189},
+      {name: "Bhel puri", benefit: "balanced food with 12.3g protein and 2.2g fiber", meal: "lunch", isVeg: true, calories: 140},
+      {name: "Chicken tikka bites", benefit: "balanced food with 2.3g protein and 0.8g fiber", meal: "breakfast", isVeg: false, calories: 233},
+      {name: "Keema samosa", benefit: "balanced food with 7.0g protein and 3.8g fiber", meal: "breakfast", isVeg: true, calories: 230},
+      {name: "Tandoori chicken strips", benefit: "high-energy food with 2.0g protein and 3.9g fiber", meal: "lunch", isVeg: false, calories: 259},
+      {name: "Fish pakora", benefit: "balanced food with 9.5g protein and 0.8g fiber", meal: "breakfast", isVeg: false, calories: 140},
+      {name: "fruit salad", benefit: "low-calorie food with 6.5g protein and 2.6g fiber", meal: "dinner", isVeg: true, calories: 83},
+      {name: "Spring rolls", benefit: "balanced food with 12.3g protein and 3.4g fiber", meal: "snacks", isVeg: true, calories: 227},
+      {name: "Sesame tofu bites", benefit: "balanced food with 4.1g protein and 3.6g fiber", meal: "lunch", isVeg: true, calories: 121},
+      {name: "Five-spice nuts", benefit: "high-energy food with 3.9g protein and 3.0g fiber", meal: "snacks", isVeg: true, calories: 270},
+      {name: "Steamed dumplings", benefit: "low-calorie food with 13.9g protein and 2.3g fiber", meal: "breakfast", isVeg: true, calories: 97},
+      {name: "Honey soy chicken wings", benefit: "high-energy food with 6.3g protein and 1.5g fiber", meal: "snacks", isVeg: false, calories: 256},
+      {name: "Char siu pork bites", benefit: "high-energy food with 14.1g protein and 1.0g fiber", meal: "lunch", isVeg: false, calories: 295},
+      {name: "Crispy wontons", benefit: "balanced food with 10.4g protein and 2.5g fiber", meal: "lunch", isVeg: true, calories: 220},
+      {name: "Hummus with pita", benefit: "balanced food with 10.6g protein and 1.1g fiber", meal: "lunch", isVeg: true, calories: 165},
+      {name: "Stuffed grape leaves", benefit: "balanced food with 11.6g protein and 1.7g fiber", meal: "lunch", isVeg: true, calories: 235},
+      {name: "Falafel", benefit: "balanced food with 11.8g protein and 1.1g fiber", meal: "lunch", isVeg: true, calories: 212},
+      {name: "Greek yogurt with honey", benefit: "balanced food with 4.7g protein and 2.0g fiber", meal: "breakfast", isVeg: true, calories: 196},
+      {name: "Tzatziki with grilled meats", benefit: "high-energy food with 13.2g protein and 2.5g fiber", meal: "lunch", isVeg: true, calories: 270},
+      {name: "Lamb kofta", benefit: "high-energy food with 6.9g protein and 3.2g fiber", meal: "snacks", isVeg: false, calories: 264},
+      {name: "Focaccia bread with olive oil", benefit: "balanced food with 5.1g protein and 3.4g fiber", meal: "breakfast", isVeg: true, calories: 198, cuisine: "Italian"},
+      {name: "Nuts and dried fruits mix", benefit: "balanced food with 9.3g protein and 1.7g fiber", meal: "breakfast", isVeg: true, calories: 192, cuisine: "Italian"},
+      {name: "Bruschetta with avocado", benefit: "low-calorie food with 10.5g protein and 1.0g fiber", meal: "snacks", isVeg: true, calories: 120, cuisine: "Italian"},
+      {name: "Panzanella", benefit: "balanced food with 7.3g protein and 3.4g fiber", meal: "lunch", isVeg: true, calories: 180, cuisine: "Italian"},
+      {name: "Arancini", benefit: "high-energy food with 6.9g protein and 1.3g fiber", meal: "snacks", isVeg: false, calories: 304, cuisine: "Italian"},
+      {name: "Meatballs", benefit: "balanced food with 7.8g protein and 3.1g fiber", meal: "breakfast", isVeg: false, calories: 216, cuisine: "Italian"},
+      {name: "Calzone bites", benefit: "low-calorie food with 9.1g protein and 1.6g fiber", meal: "lunch", isVeg: false, calories: 132, cuisine: "Italian"},
+      {name: "Stuffed mushrooms", benefit: "balanced food with 11.6g protein and 2.3g fiber", meal: "dinner", isVeg: false, calories: 245, cuisine: "Italian"},
+      {name: "Samosas", benefit: "balanced food with 5.5g protein and 1.2g fiber", meal: "snacks", isVeg: true, calories: 206, cuisine: "Indian"},
+      {name: "Pakoras", benefit: "balanced food with 3.7g protein and 0.7g fiber", meal: "snacks", isVeg: true, calories: 238, cuisine: "Indian"},
+      {name: "Aloo tikki", benefit: "balanced food with 5.0g protein and 0.8g fiber", meal: "lunch", isVeg: true, calories: 255, cuisine: "Indian"},
+      {name: "Peanut chikki", benefit: "balanced food with 13.5g protein and 1.4g fiber", meal: "lunch", isVeg: true, calories: 204, cuisine: "Indian"},
+      {name: "Chicken pakora", benefit: "balanced food with 6.4g protein and 1.2g fiber", meal: "lunch", isVeg: false, calories: 193, cuisine: "Indian"},
+      {name: "Kathi rolls", benefit: "balanced food with 5.7g protein and 0.6g fiber", meal: "lunch", isVeg: false, calories: 221, cuisine: "Indian"},
+      {name: "Malai tikka", benefit: "balanced food with 12.4g protein and 1.1g fiber", meal: "dinner", isVeg: false, calories: 215, cuisine: "Indian"}
+
+
+
+    ];
+
+    // Tips for different health conditions
+    const healthTips = {
+      "Diabetes": [
+        "Choose foods with a low glycemic index to help manage blood sugar levels.",
+        "Include fiber-rich foods like whole grains, fruits, and vegetables in your meals.",
+        "Spread your carbohydrate intake evenly throughout the day."
+      ],
+      "Hypertension": [
+        "Limit sodium intake by avoiding processed foods and using herbs for flavor instead of salt.",
+        "Include potassium-rich foods like bananas, potatoes, and leafy greens in your diet.",
+        "DASH diet (Dietary Approaches to Stop Hypertension) can be effective for managing blood pressure."
+      ],
+      "Thyroid": [
+        "Ensure adequate iodine intake through iodized salt or seafood.",
+        "Include selenium-rich foods like Brazil nuts, tuna, and eggs.",
+        "Be mindful of goitrogenic foods like soy, cabbage, and broccoli if you have hypothyroidism."
+      ],
+      "Heart Disease": [
+        "Focus on heart-healthy fats like those found in olive oil, avocados, and nuts.",
+        "Include omega-3 rich foods like fatty fish, flaxseeds, and walnuts.",
+        "Limit saturated fats and trans fats found in processed foods and red meats."
+      ],
+      "Asthma": [
+        "Include foods rich in vitamin D and antioxidants.",
+        "Some people find that certain foods like fish oil and fruits/vegetables help manage symptoms.",
+        "Stay well-hydrated to help keep airways clear."
+      ],
+      "None": [
+        "Stay hydrated by drinking at least 8 glasses of water daily.",
+        "Include a variety of colorful fruits and vegetables in your diet for a range of nutrients.",
+        "Balance your plate with proteins, carbohydrates, and healthy fats."
+      ]
+    };
+
+    // Function to get food recommendations based on personal details
+    function getFoodRecommendations(goal, isVeg, cuisine, disease) {
+      // Filter based on vegetarian preference
+      let filteredFoods = foodDatabase.filter(food => {
+        if (isVeg) {
+          return food.isVeg; // Only vegetarian foods for vegetarians
+        }
+        return true; // Both veg and non-veg for non-vegetarians
+      });
+      
+      // Filter by cuisine if specific cuisine is selected
+      if (cuisine && cuisine !== "Other") {
+        // Get foods from preferred cuisine first, then fill with others if needed
+        const cuisineFoods = filteredFoods.filter(food => food.name.includes(cuisine));
+        
+        // If not enough foods from preferred cuisine, include others
+        if (cuisineFoods.length < 15) {
+          filteredFoods = [...cuisineFoods, ...filteredFoods.filter(food => !food.name.includes(cuisine))];
+        } else {
+          filteredFoods = cuisineFoods;
+        }
+      }
+      
+      // Sort and select foods based on health goal
+      switch(goal) {
+        case "Weight Loss":
+          // Sort by lowest calories first
+          filteredFoods.sort((a, b) => a.calories - b.calories);
+          break;
+        case "Weight Gain":
+          // Sort by highest calories first
+          filteredFoods.sort((a, b) => b.calories - a.calories);
+          break;
+        case "Heart Health":
+          // Prioritize heart-healthy foods
+          filteredFoods.sort((a, b) => {
+            const heartHealthyTerms = ["omega", "antioxidant", "fiber", "heart"];
+            const aScore = heartHealthyTerms.reduce((score, term) => 
+              score + (a.benefit.toLowerCase().includes(term) ? 1 : 0), 0);
+            const bScore = heartHealthyTerms.reduce((score, term) => 
+              score + (b.benefit.toLowerCase().includes(term) ? 1 : 0), 0);
+            return bScore - aScore;
+          });
+          break;
+        // Add more cases for other health goals
+      }
+      
+      // Group foods by meal type
+      const breakfast = filteredFoods.filter(food => food.meal.includes("breakfast")).slice(0, 4);
+      const lunch = filteredFoods.filter(food => food.meal.includes("lunch")).slice(0, 4);
+      const dinner = filteredFoods.filter(food => food.meal.includes("dinner")).slice(0, 4);
+      
+      // For snacks, choose lower calorie options (for weight loss) or higher calorie (for weight gain)
+      let snacks;
+      if (goal === "Weight Loss") {
+        snacks = filteredFoods.filter(food => food.calories < 100).slice(0, 3);
+      } else if (goal === "Weight Gain") {
+        snacks = filteredFoods.filter(food => food.calories > 100 && food.calories < 300).slice(0, 3);
+      } else {
+        snacks = filteredFoods.slice(0, 3); // General snacks
+      }
+      
+      return {
+        breakfast,
+        lunch,
+        dinner,
+        snacks
+      };
+    }
+
+    // Function to display the user's personal information
+    function displayUserInfo() {
+      const userInfo = document.getElementById('user-info');
+      
+      // Get user data from localStorage
+      const name = localStorage.getItem('userName') || 'Friend';
+      const height = localStorage.getItem('userHeight') || '170';
+      const weight = localStorage.getItem('userWeight') || '70';
+      const goal = localStorage.getItem('userGoal') || 'Healthy';
+      const disease = localStorage.getItem('userDisease') || 'None';
+      const activity = localStorage.getItem('userActivity') || 'Moderate';
+      
+      userInfo.innerHTML = `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Height:</strong> ${height} cm</p>
+        <p><strong>Weight:</strong> ${weight} kg</p>
+        <p><strong>Goal:</strong> ${goal}</p>
+        <p><strong>Health Condition:</strong> ${disease}</p>
+        <p><strong>Activity Level:</strong> ${activity}</p>
+      `;
+      
+      // Display a health tip based on the user's condition
+      const tipElement = document.getElementById('nutrition-tip');
+      const conditionTips = healthTips[disease] || healthTips["None"];
+      const randomTip = conditionTips[Math.floor(Math.random() * conditionTips.length)];
+      tipElement.textContent = `Tip: ${randomTip}`;
+    }
+
+    // Function to create and display a food item
+    function createFoodItemElement(food) {
+      const foodItem = document.createElement('div');
+      foodItem.classList.add('food-item');
+      
+      foodItem.innerHTML = `
+        <h3>${food.name}</h3>
+        <p><strong>Benefit:</strong> ${food.benefit}</p>
+        <p><strong>Calories:</strong> ${food.calories}</p>
+      `;
+      
+      return foodItem;
+    }
+
+    // Function to display the diet plan
+    function displayDietPlan() {
+      // Try to get the dietPlan from localStorage first
+      let dietPlan = null;
+      try {
+        dietPlan = JSON.parse(localStorage.getItem('dietPlan'));
+      } catch (error) {
+        console.error("Error parsing diet plan from localStorage:", error);
+      }
+      
+      // If no diet plan in localStorage or it's invalid, generate a new one
+      if (!dietPlan || !dietPlan.breakfast) {
+        const isVeg = localStorage.getItem('userDietType') === '1';
+        const goal = localStorage.getItem('userGoal') || 'Healthy';
+        const cuisine = localStorage.getItem('userCuisine') || '';
+        const disease = localStorage.getItem('userDisease') || 'None';
+        
+        dietPlan = getFoodRecommendations(goal, isVeg, cuisine, disease);
+        
+        // Save the new diet plan to localStorage
+        localStorage.setItem('dietPlan', JSON.stringify(dietPlan));
+      }
+      
+      // Display foods by meal type
+      const breakfastContainer = document.getElementById('breakfast-foods');
+      const lunchContainer = document.getElementById('lunch-foods');
+      const dinnerContainer = document.getElementById('dinner-foods');
+      const snacksContainer = document.getElementById('snacks-foods');
+      
+      // Clear previous content
+      breakfastContainer.innerHTML = '';
+      lunchContainer.innerHTML = '';
+      dinnerContainer.innerHTML = '';
+      snacksContainer.innerHTML = '';
+      
+      // Add breakfast foods
+      if (dietPlan.breakfast && dietPlan.breakfast.length > 0) {
+        dietPlan.breakfast.forEach(food => {
+          if (typeof food === 'string') {
+            // Handle case where food is just a string name
+            const foodObject = foodDatabase.find(item => item.name === food) || 
+                              {name: food, benefit: "Nutritious food choice", calories: "N/A"};
+            breakfastContainer.appendChild(createFoodItemElement(foodObject));
+          } else {
+            // Handle case where food is an object
+            breakfastContainer.appendChild(createFoodItemElement(food));
+          }
+        });
+      } else {
+        breakfastContainer.innerHTML = '<p>No breakfast recommendations available.</p>';
+      }
+      
+      // Add lunch foods
+      if (dietPlan.lunch && dietPlan.lunch.length > 0) {
+        dietPlan.lunch.forEach(food => {
+          if (typeof food === 'string') {
+            const foodObject = foodDatabase.find(item => item.name === food) || 
+                              {name: food, benefit: "Nutritious food choice", calories: "N/A"};
+            lunchContainer.appendChild(createFoodItemElement(foodObject));
+          } else {
+            lunchContainer.appendChild(createFoodItemElement(food));
+          }
+        });
+      } else {
+        lunchContainer.innerHTML = '<p>No lunch recommendations available.</p>';
+      }
+      
+      // Add dinner foods
+      if (dietPlan.dinner && dietPlan.dinner.length > 0) {
+        dietPlan.dinner.forEach(food => {
+          if (typeof food === 'string') {
+            const foodObject = foodDatabase.find(item => item.name === food) || 
+                              {name: food, benefit: "Nutritious food choice", calories: "N/A"};
+            dinnerContainer.appendChild(createFoodItemElement(foodObject));
+          } else {
+            dinnerContainer.appendChild(createFoodItemElement(food));
+          }
+        });
+      } else {
+        dinnerContainer.innerHTML = '<p>No dinner recommendations available.</p>';
+      }
+      
+      // Add snack foods
+      if (dietPlan.snacks && dietPlan.snacks.length > 0) {
+        dietPlan.snacks.forEach(food => {
+          if (typeof food === 'string') {
+            const foodObject = foodDatabase.find(item => item.name === food) || 
+                              {name: food, benefit: "Nutritious food choice", calories: "N/A"};
+            snacksContainer.appendChild(createFoodItemElement(foodObject));
+          } else {
+            snacksContainer.appendChild(createFoodItemElement(food));
+          }
+        });
+      } else {
+        snacksContainer.innerHTML = '<p>No snack recommendations available.</p>';
+      }
+    }
+
+    // Initialize the page
+    window.onload = function() {
+      displayUserInfo();
+      displayDietPlan();
+    };
+
+    function toggleChatbot() {
+  const box = document.getElementById('chatbot-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+async function getGeminiResponse(userMessage) {
+  const apiKey = "AIzaSyD3oCC5X0ODIGL56C6ZZUFCErni1hRSLyE"; // Replace with your actual Gemini API key
+  const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+  try {
+    const response = await fetch(`${endpoint}?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: userMessage }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.candidates && data.candidates.length > 0) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error("No valid response from Gemini.");
+    }
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    throw new Error("Failed to get AI response.");
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const message = input.value.trim();
+  if (!message) return;
+
+  const chatBox = document.getElementById('chat-messages');
+  chatBox.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
+
+  input.value = '...thinking';
+  input.disabled = true;
+
+  try {
+    const reply = await getGeminiResponse(message);
+    chatBox.innerHTML += `<div><strong>NutriMate:</strong> ${reply}</div>`;
+  } catch (err) {
+    chatBox.innerHTML += `<div><strong>NutriMate:</strong> Sorry, I couldn't understand that.</div>`;
+  }
+
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+  document.getElementById('chatbot-body').scrollTop = chatBox.scrollHeight;
+}
+
+  </script>
+
+</body>
+</html>
